@@ -228,6 +228,12 @@ export const translations = {
     analytics_overage_label: "Aşım: {amount}",
     analytics_recommendation_label: "Öneri: {tier}",
     analytics_overage_empty: "Limit aşımı olan müşteri bulunamadı.",
+    risk_distribution_title: "Müşteri risk dağılımı",
+    risk_distribution_subtitle: "Risk analiz etiketlerine göre oran",
+    risk_distribution_aria: "Müşteri risk dağılım grafiği",
+    risk_category_guvenilir: "Güvenilir",
+    risk_category_normal: "Normal",
+    risk_category_riskli: "Riskli",
 
     // Bölgesel
     regional_loading: "Bölgesel veriler hazırlanıyor…",
@@ -474,6 +480,12 @@ export const translations = {
     analytics_overage_label: "Overage: {amount}",
     analytics_recommendation_label: "Recommendation: {tier}",
     analytics_overage_empty: "No customers with overage were found.",
+    risk_distribution_title: "Customer risk distribution",
+    risk_distribution_subtitle: "Share by risk analysis tag",
+    risk_distribution_aria: "Customer risk distribution chart",
+    risk_category_guvenilir: "Reliable",
+    risk_category_normal: "Normal",
+    risk_category_riskli: "Risky",
 
     // Regional
     regional_loading: "Regional data is being prepared…",

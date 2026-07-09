@@ -43,7 +43,13 @@ export default function useCustomers() {
   }, []);
 
   useEffect(() => {
-    loadCustomers(0, queryParams);
+    const timeoutId = window.setTimeout(() => {
+      loadCustomers(0, queryParams);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

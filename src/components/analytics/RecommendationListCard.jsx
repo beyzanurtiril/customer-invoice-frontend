@@ -18,27 +18,37 @@ export default function RecommendationListCard({ action, actionLabel }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!action) return;
+    if (!action) return undefined;
 
     let active = true;
-    setLoading(true);
 
-    getRecommendationList(action, 0, 10)
-      .then((result) => {
-        if (!active) return;
-        setItems(result.items);
-        setTotalPages(result.totalPages);
-        setTotalElements(result.totalElements);
-        setPage(result.page);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    const timeoutId = window.setTimeout(() => {
+      setLoading(true);
+
+      getRecommendationList(action, 0, 10)
+        .then((result) => {
+          if (!active) return;
+
+          setItems(result.items ?? []);
+          setTotalElements(result.totalElements ?? 0);
+          setTotalPages(result.totalPages ?? 1);
+        })
+        .catch(() => {
+          if (!active) return;
+          setItems([]);
+        })
+        .finally(() => {
+          if (!active) return;
+          setLoading(false);
+        });
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(timeoutId);
     };
   }, [action]);
+
 
   const goToPage = (nextPage) => {
     if (nextPage < 0 || nextPage >= totalPages) return;

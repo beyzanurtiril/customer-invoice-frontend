@@ -80,7 +80,7 @@ function matchesMonthlyInvoiceRange(customer, selectedRange) {
 export default function CustomersPage() {
   // Arayüz metinlerini seçili dile göre döndürür.
   const { locale, t, tv } = useLanguage();
-  const languageLocale = locale === "en-US" ? "en-US" : "tr-TR";
+
 
   /*
     useCustomers hook'undan müşteri verilerini ve backend işlemlerini alıyoruz.

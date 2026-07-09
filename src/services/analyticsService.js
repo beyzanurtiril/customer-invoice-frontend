@@ -79,6 +79,15 @@ function normalizeUpgradeRecommendations(response) {
   };
 }
 
+function normalizeRiskCategorySummary(response) {
+  const items = getListFromResponse(response);
+
+  return items.map((item) => ({
+    category: item.category,
+    count: Number(item.customerCount ?? item.count ?? 0),
+  }));
+}
+
 const RECOMMENDATION_LABELS = {
   kampanya_teklifi: { label: "Kampanya Teklifi", tone: "success" },
   oto_odeme_teklifi: { label: "Otomatik Ödeme Teklifi", tone: "warning" },
@@ -105,6 +114,21 @@ export async function getRecommendationSummary() {
       ...getRecommendationMeta(item.recommendAction),
     }))
     .sort((a, b) => b.count - a.count);
+}
+
+export async function getRiskCategorySummary() {
+  if (isApiEnabled()) {
+    const response = await apiRequest("/analysis/risk-categories/summary");
+    return normalizeRiskCategorySummary(response);
+  }
+
+  await wait();
+
+  return [
+    { category: "guvenilir", count: 6200 },
+    { category: "normal", count: 2800 },
+    { category: "riskli", count: 1000 },
+  ];
 }
 
 export async function getRecommendationList(action, page = 0, size = 10) {

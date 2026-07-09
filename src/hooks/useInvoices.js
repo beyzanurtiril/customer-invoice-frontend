@@ -36,7 +36,13 @@ export default function useInvoices() {
   }, []);
 
   useEffect(() => {
-    loadInvoices(0, searchParams);
+    const timeoutId = window.setTimeout(() => {
+      loadInvoices(0, searchParams);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

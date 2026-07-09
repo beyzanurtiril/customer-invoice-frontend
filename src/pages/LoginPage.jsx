@@ -100,9 +100,6 @@ export default function LoginPage({ onLogin }) {
             <label className="login-field">
               <span className="login-password-label">
                 <span>{t("login_password_label")}</span>
-                <button type="button" className="login-forgot-button">
-                  {t("login_forgot_password")}
-                </button>
               </span>
 
               <input

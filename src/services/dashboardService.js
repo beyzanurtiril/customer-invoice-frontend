@@ -17,6 +17,7 @@ import { normalizeBackendRegionName, normalizeCityText } from "../utils/turkeyCi
 import { apiRequest, isApiEnabled } from "./apiClient.js";
 
 const MOCK_DELAY_MS = 350;
+let dashboardRequestPromise = null;
 
 function wait(ms = MOCK_DELAY_MS) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -171,8 +172,15 @@ function normalizeDashboardResponse(response) {
 
 export async function getDashboardData() {
   if (isApiEnabled()) {
-    const response = await apiRequest("/dashboard");
-    return normalizeDashboardResponse(response);
+    if (!dashboardRequestPromise) {
+      dashboardRequestPromise = apiRequest("/dashboard")
+        .then(normalizeDashboardResponse)
+        .finally(() => {
+          dashboardRequestPromise = null;
+        });
+    }
+
+    return dashboardRequestPromise;
   }
 
   await wait();
