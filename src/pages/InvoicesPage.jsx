@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddInvoiceModal from "../components/invoices/AddInvoiceModal";
 import DeleteInvoiceModal from "../components/invoices/DeleteInvoiceModal";
 import InvoiceActionsModal from "../components/invoices/InvoiceActionsModal";
 import InvoiceTable from "../components/invoices/InvoiceTable";
 import UpdateInvoiceModal from "../components/invoices/UpdateInvoiceModal";
+import StatCard from "../components/dashboard/StatCard";
 import Button from "../components/ui/Button";
 import Modal from "../components/ui/Modal";
 import Pagination from "../components/ui/Pagination";
 import StatusMessage from "../components/ui/StatusMessage";
 import { useLanguage } from "../context/LanguageContext";
 import useInvoices from "../hooks/useInvoices";
+import { getInvoiceSummary } from "../services/invoiceService";
+
+/*
+  Büyük tutarları Figma'daki gibi kompakt yazar: 14.800.000 -> "14,8M ₺".
+  Milyon altı değerler binlik ayraçla tam yazılır.
+*/
+function compactMoney(value, locale) {
+  const numeric = Number(value ?? 0);
+  if (numeric >= 1_000_000) {
+    return `${(numeric / 1_000_000).toLocaleString(locale, { maximumFractionDigits: 1 })}M ₺`;
+  }
+  return `${numeric.toLocaleString(locale, { maximumFractionDigits: 0 })} ₺`;
+}
 
 export default function InvoicesPage() {
   const {
@@ -27,7 +41,19 @@ export default function InvoicesPage() {
     editInvoice,
     removeInvoice,
   } = useInvoices();
-  const { t, tv } = useLanguage();
+  const { t, tv, locale } = useLanguage();
+  const [summary, setSummary] = useState(null);
+
+  // Özet kartları listeden bağımsız yüklenir; başarısız olursa kartlar gizlenir.
+  useEffect(() => {
+    let active = true;
+    getInvoiceSummary().then((result) => {
+      if (active) setSummary(result);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -96,6 +122,36 @@ export default function InvoicesPage() {
         <StatusMessage tone="danger" action={<Button onClick={reload}>{t("button_retry")}</Button>}>
           {tv(error)}
         </StatusMessage>
+      ) : null}
+
+      {summary ? (
+        <div className="stats-grid">
+          <StatCard
+            label={t("invoices_stat_annual")}
+            value={compactMoney(summary.expectedAnnualRevenue, locale)}
+            change={t("invoices_stat_annual_sub")}
+          />
+          <StatCard
+            label={t("invoices_stat_mobile")}
+            value={`%${Number(summary.mobileChannelRate ?? 0).toLocaleString(locale, { maximumFractionDigits: 1 })}`}
+            change={`${summary.mobileTopRegion} ${t("invoices_stat_mobile_sub")}`}
+          />
+          <StatCard
+            tone="warning"
+            label={t("invoices_stat_overdue")}
+            value={Number(summary.overdueCount ?? 0).toLocaleString(locale)}
+            change={t("invoices_stat_overdue_sub")}
+          />
+          <StatCard
+            tone="danger"
+            label={t("invoices_stat_overage")}
+            value={Number(summary.overageCount ?? 0).toLocaleString(locale)}
+            change={t("invoices_stat_overage_sub").replace(
+              "{amount}",
+              Number(summary.averageOverageAmount ?? 0).toLocaleString(locale),
+            )}
+          />
+        </div>
       ) : null}
 
       <div className="customer-toolbar invoice-toolbar">

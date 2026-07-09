@@ -134,6 +134,16 @@ function normalizeInvoice(invoice, customer) {
   };
 }
 
+/*
+  Faturalar sayfasının üst özet kartları. Backend tek endpoint'te 4 kartın
+  verisini döner (GET /invoices/summary); hata durumunda null döner ve sayfa
+  kartları çizmeden çalışmaya devam eder.
+*/
+export async function getInvoiceSummary() {
+  if (!isApiEnabled()) return null;
+  return optionalApiRequest("/invoices/summary", null);
+}
+
 export async function getInvoices(page = 0, size = 20, options = {}) {
   const { query = "", status = "" } = options;
 
