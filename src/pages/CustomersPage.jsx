@@ -258,10 +258,11 @@ export default function CustomersPage() {
   */
   const filteredCustomers = useMemo(() => {
       return customers.filter((customer) => {
-        const matchesTag = filters.tag === "Tümü" || customer.tag === filters.tag;
+        // Etiket artık sunucuda filtrelenir (riskCategory); yerelde ikinci kez
+        // elenirse sayfalama sayıları tabloyla çelişir.
         const matchesMonthlyInvoice = matchesMonthlyInvoiceRange(customer, filters.monthlyInvoice);
 
-        return matchesTag && matchesMonthlyInvoice;
+        return matchesMonthlyInvoice;
       });
     }, [customers, filters]);
 
@@ -271,9 +272,10 @@ export default function CustomersPage() {
         lineType: filters.lineType,
         city: filters.city,
         delay: filters.delay,
+        tag: filters.tag,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search, filters.lineType, filters.city, filters.delay]);
+    }, [search, filters.lineType, filters.city, filters.delay, filters.tag]);
 
   /*filter additions*/
   const handleFilterChange = (name, value) => {

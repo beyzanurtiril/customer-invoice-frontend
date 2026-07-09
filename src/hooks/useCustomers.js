@@ -22,6 +22,7 @@ export default function useCustomers() {
     lineType: "Tümü",
     city: "Tümü",
     delay: "Tümü",
+    tag: "Tümü",
   });
 
   const loadCustomers = useCallback(async (targetPage, params) => {

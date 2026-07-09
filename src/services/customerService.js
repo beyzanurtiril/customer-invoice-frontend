@@ -103,11 +103,26 @@ function getAgeGroupFromBirthDate(value) {
 }
 
 function normalizeRiskTag(riskTag) {
-  const value = String(riskTag ?? "").toUpperCase();
+  /*
+    KRİTİK: Backend Türkçe karakterli değerler gönderir ("RİSKLİ", "AKTİF",
+    "PASİF"). Noktalı İ (U+0130), ASCII I ile AYNI DEĞİLDİR; bu yüzden
+    "RİSKLİ".includes("RISK") false döner ve eski kod HER müşteriyi
+    "Güvenilir" gösteriyordu. Önce Türkçe harfler ASCII'ye katlanır,
+    eşleşme ondan sonra yapılır.
+  */
+  const value = String(riskTag ?? "")
+    .toLocaleUpperCase("tr-TR")
+    .replaceAll("İ", "I")
+    .replaceAll("Ü", "U")
+    .replaceAll("Ö", "O")
+    .replaceAll("Ş", "S")
+    .replaceAll("Ç", "C")
+    .replaceAll("Ğ", "G");
 
   if (value.includes("RISK") || value.includes("HIGH")) return "Riskli";
-  if (value.includes("ACTIVE")) return "Aktif";
-  if (value.includes("PASSIVE")) return "Pasif";
+  if (value.includes("AKTIF") || value.includes("ACTIVE")) return "Aktif";
+  if (value.includes("PASIF") || value.includes("PASSIVE")) return "Pasif";
+  if (value.includes("NORMAL") || value.includes("ORTA")) return "Normal";
 
   return "Güvenilir";
 }
@@ -401,6 +416,7 @@ export async function getCustomers(options = {}) {
     lineType = "Tümü",
     city = "Tümü",
     delay = "Tümü",
+    tag = "Tümü",
   } = options;
 
   if (isApiEnabled()) {
@@ -412,6 +428,13 @@ export async function getCustomers(options = {}) {
     if (lineType === "Faturalı") params.set("subscriptionType", "faturali");
     if (lineType === "Faturasız") params.set("subscriptionType", "faturasiz");
     if (delay === "3+ kez") params.set("minOverdueCount", "3");
+
+    /*
+      Etiket, customer_risk_analysis.behavior_category'ye göre SUNUCUDA
+      filtrelenir (recalculate-stats + recalculate-risk çalıştırılmış olmalı).
+    */
+    const tagToCategory = { "Riskli": "riskli", "Güvenilir": "guvenli", "Aktif": "aktif", "Pasif": "pasif", "Normal": "orta_risk" };
+    if (tagToCategory[tag]) params.set("riskCategory", tagToCategory[tag]);
 
     const regionId = await resolveCityToRegionId(city);
     if (regionId) params.set("regionId", String(regionId));
