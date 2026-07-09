@@ -163,7 +163,7 @@ function normalizeDashboardResponse(response) {
 
     recommendations: (response?.recommendations ?? []).map((text, index) => ({
       title: text,
-      description: "Backend dashboard önerisi",
+      description: "dashboard önerisi",
       tone: index === 1 ? "danger" : "accent",
     })),
   };
