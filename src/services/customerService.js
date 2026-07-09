@@ -30,9 +30,22 @@ function formatMoney(value) {
 }
 
 function normalizeText(value) {
-  return String(value ?? "")
-    .trim()
-    .toLocaleLowerCase("tr-TR");
+  try {
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    return String(value)
+      .trim()
+      .toLocaleLowerCase("tr-TR")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // İ üstündeki görünmeyen nokta/aksanları temizler
+      .replace(/ı/g, "i")              // Türkçe noktasız ı'yı i yapar
+      .replace(/[\u200B-\u200D\uFEFF]/g, "") // görünmeyen boşluk karakterlerini temizler
+      .replace(/\s+/g, " ");           // fazla boşlukları tek boşluğa indirir
+  } catch {
+    return "";
+  }
 }
 
 function getCustomerId(customer) {
